@@ -74,7 +74,7 @@ void Controller::setParams(unsigned char *mparams)
 {
   _mparams = mparams;
   byte flags = 0;
-  
+
   for (Service * svc : services)
   {
     switch (svc->getServiceID())
@@ -95,7 +95,7 @@ void Controller::setParams(unsigned char *mparams)
   }
   if (module_config->currentMode == MODE_NORMAL)
   {
-    flags |= PF_NORMAL; 
+    flags |= PF_NORMAL;
   }
   _mparams[PAR_FLAGS] = flags;
 }
@@ -115,16 +115,16 @@ void Controller::setName(const unsigned char *mname)
 void Controller::indicateMode(byte mode)
 {
   // DEBUG_SERIAL << F("> indicating mode = ") << mode << endl;
-  if (_ui) 
+  if (_ui)
   {
     _ui->indicateMode(mode);
   }
-  
+
   setParamFlag(PF_NORMAL, mode == MODE_NORMAL);
 }
 
 void Controller::setParamFlag(unsigned char flag, bool set)
-{ 
+{
   if (set)
   {
     _mparams[PAR_FLAGS] |= flag;
@@ -186,7 +186,7 @@ void Controller::process(byte num_messages)
     /// if we got this far, it's a standard CAN frame (not extended, not RTR) with a data payload length > 0
     //
 
-    if (msg.len > 0) 
+    if (msg.len > 0)
     {
       unsigned int opc = msg.data[0];
       // DEBUG_SERIAL << "> Passing on message with op=" << _HEX(opc) << endl;
@@ -228,7 +228,22 @@ bool Controller::sendMessageWithNNandData(int opc, int len, ...)
     msg.data[3 + i] = va_arg(args, int);
   }
   va_end(args);
-  return sendMessage(&msg);  
+  return sendMessage(&msg);
+}
+
+bool Controller::sendMessageWithData(int opc, int len, ...)
+{
+  va_list args;
+  va_start(args, len);
+  VlcbMessage msg;
+  msg.len = len + 1;
+  msg.data[0] = opc;
+  for (int i = 0 ; i < len ; ++i)
+  {
+    msg.data[1 + i] = va_arg(args, int);
+  }
+  va_end(args);
+  return sendMessage(&msg);
 }
 
 //
