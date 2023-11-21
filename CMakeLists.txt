@@ -11,6 +11,7 @@ include(cmake/arduino_core.cmake)
 include(cmake/arduino_libs.cmake)
 include(cmake/arduino_Streaming.cmake)
 include(cmake/arduino_ACAN2515.cmake)
+include(cmake/arduino_Bounce2.cmake)
 include(cmake/arduino_hex.cmake)
 include(cmake/arduino_upload.cmake)
 include(cmake/arduino_flags.cmake)
@@ -75,19 +76,6 @@ else()
         target_link_libraries(core_library PUBLIC ArduinoMock)
 endif()
 
-set(SKETCH examples/VLCB_1in1out/VLCB_1in1out.ino)
-
-set_source_files_properties(${SKETCH} PROPERTIES LANGUAGE CXX)
-add_executable(VLCB_1in1out ${SKETCH})
-
-target_link_libraries(VLCB_1in1out PUBLIC hardware_library)
-target_link_libraries(VLCB_1in1out PUBLIC core_library)
-target_link_libraries(VLCB_1in1out PUBLIC ArduinoFlags)
-target_link_libraries(VLCB_1in1out PUBLIC ArduinoCore)
-target_link_libraries(VLCB_1in1out PUBLIC ArduinoLibs)
-target_link_libraries(VLCB_1in1out PUBLIC ArduinoStreaming)
-target_link_libraries(VLCB_1in1out PUBLIC ArduinoACAN2515)
-
 add_library(ArduinoMock INTERFACE)
 target_include_directories(ArduinoMock INTERFACE
         Arduino
@@ -122,12 +110,13 @@ target_link_libraries(testAll PUBLIC ArduinoMock)
 target_link_libraries(testAll PUBLIC core_library)
 
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "avr")
-        arduino_avr_hex(VLCB_1in1out)
-
         set(ARDUINO_PORT "/dev/ttyACM0" CACHE STRING
                 "The serial port for uploading using avrdude")
 
-        arduino_avr_upload(VLCB_1in1out ${ARDUINO_PORT})
+        include(examples/VLCB_1in1out/VLCB_1in1out.cmake)
+        include(examples/VLCB_4in4out/VLCB_4in4out.cmake)
+        include(examples/VLCB_empty/VLCB_empty.cmake)
+        include(examples/VLCB_long_message_example/VLCB_long_message_example.cmake)
 else()
         enable_testing()
         add_test(NAME testAll COMMAND $<TARGET_FILE:testAll>)
