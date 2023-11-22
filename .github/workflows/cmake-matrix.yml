@@ -1,0 +1,55 @@
+name: Build, test and publish examples.
+
+on:
+  push:
+    branches: [ "github-actions" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - build-type: Debug
+            toolchain: host
+            compiler: clang++
+            publish: false
+            os: ubuntu-latest
+          - build-type: MinSizeRel
+            toolchain: uno
+            compiler: avr-g++
+            publish: true
+            os: ubuntu-latest
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: install libraries
+      uses: arduino/compile-sketches@v1
+      with:
+          sketch-paths: '[]'
+          libraries: |
+            - name: Streaming
+            - name: Bounce2
+            - name: ACAN2515
+            - name: AVR_PWM
+            - name: 'PCF8574 library'
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build-type}} -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/${{matrix.toolchain}}.toolchain.cmake -D CMAKE_CXX_COMPILER=${{matrix.compiler}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build-type}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{matrix.build-type}}
+
+    - name: Publish
+      if: ${{matrix.publish}}
+      uses: actions/upload-artifact@v3
+      with:
+        name: examples
+        path: |
+          ${{github.workspace}}/build/*.hex
+          ${{github.workspace}}/build/*.elf
