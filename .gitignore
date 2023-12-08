@@ -6,6 +6,7 @@
 .DS_Store
 .idea
 build
+build-pico
 build-test
 build-test-asan
 

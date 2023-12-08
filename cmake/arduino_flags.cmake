@@ -22,6 +22,34 @@ target_link_options(ArduinoFlags INTERFACE
 )
 target_compile_features(ArduinoFlags INTERFACE cxx_std_11 c_std_11)
 
+elseif (CMAKE_SYSTEM_PROCESSOR STREQUAL "cortex-m0plus")
+
+add_library(ArduinoFlags INTERFACE)
+target_compile_options(ArduinoFlags INTERFACE
+    "-iprefix${ARDUINO_RP2040_PATH}/"
+    "@${ARDUINO_RP2040_PATH}/lib/platform_inc.txt"
+    "-Wall"
+    "-Wextra"
+    "-Wno-unused-variable"
+    "-Wno-unused-parameter"
+    "-fno-exceptions"
+    "-ffunction-sections"
+    "-fdata-sections"
+    "$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>"
+)
+target_compile_definitions(ArduinoFlags INTERFACE
+    "ARDUINO=${ARDUINO_VERSION}"
+    "ARDUINO_${ARDUINO_BOARD}"
+    "ARDUINO_ARCH_RP2040"
+    "ARDUINO_VARIANT=\"${ARDUINO_VARIANT}\""
+)
+target_link_options(ArduinoFlags INTERFACE
+#    "-fuse-linker-plugin"
+    "LINKER:--gc-sections"
+)
+target_compile_features(ArduinoFlags INTERFACE cxx_std_11 c_std_11)
+
 else()
 
 add_library(ArduinoFlags INTERFACE)

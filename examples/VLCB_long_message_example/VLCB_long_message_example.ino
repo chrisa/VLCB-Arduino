@@ -49,7 +49,7 @@ VLCB::LongMessageService lmsg;        // Controller RFC0005 long message object
 VLCB::EventConsumerService ecService;
 VLCB::EventTeachingService etService;
 VLCB::EventProducerService epService;
-VLCB::Controller controller(&userInterface, &modconfig, &can2515, 
+VLCB::Controller controller(&userInterface, &modconfig, &can2515,
                             { &mnService, &canService, &nvService, &lmsg, &ecService, &epService, &etService }); // Controller object
 
 // module name, must be 7 characters, space padded.
@@ -77,7 +77,7 @@ void setupVLCB()
   modconfig.EE_MAX_EVENTS = 32;
   modconfig.EE_PRODUCED_EVENTS = 1;
   modconfig.EE_NUM_EVS = 1;
-  
+
   // initialise and load configuration
   controller.begin();
 
@@ -115,7 +115,12 @@ void setupVLCB()
   // configure and start CAN bus and VLCB message processing
   can2515.setNumBuffers(4, 2);      // more buffers = more memory used, fewer = less
   can2515.setOscFreq(16000000UL);   // select the crystal frequency of the CAN module
+#ifdef ARDUINO_ARCH_RP2040
+  can2515.setPins(1, 2, 3, 4, 5);           // select pins for CAN bus CE and interrupt connections
+#else
   can2515.setPins(10, 2);           // select pins for CAN bus CE and interrupt connections
+#endif
+
   can2515.begin();
 }
 

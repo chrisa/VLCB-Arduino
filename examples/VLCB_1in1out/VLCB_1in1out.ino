@@ -53,7 +53,7 @@ VLCB::NodeVariableService nvService;
 VLCB::EventConsumerService ecService;
 VLCB::EventTeachingService etService;
 VLCB::EventProducerService epService;
-VLCB::Controller controller(&combinedUserInterface, &modconfig, &can2515, 
+VLCB::Controller controller(&combinedUserInterface, &modconfig, &can2515,
                             { &mnService, &canService, &nvService, &ecService, &epService, &etService }); // Controller object
 
 // module objects
@@ -82,7 +82,7 @@ void setupVLCB()
   modconfig.EE_MAX_EVENTS = 32;
   modconfig.EE_PRODUCED_EVENTS = 1;
   modconfig.EE_NUM_EVS = 1;
- 
+
 
   // initialise and load configuration
   controller.begin();
@@ -106,7 +106,7 @@ void setupVLCB()
   VLCB::Parameters params(modconfig);
   params.setVersion(VER_MAJ, VER_MIN, VER_BETA);
   params.setModuleId(MODULE_ID);
- 
+
   // assign to Controller
   controller.setParams(params.getParams());
   controller.setName(mname);
@@ -137,7 +137,12 @@ void setupVLCB()
   // configure and start CAN bus and VLCB message processing
   can2515.setNumBuffers(2, 1);      // more buffers = more memory used, fewer = less
   can2515.setOscFreq(16000000UL);   // select the crystal frequency of the CAN module
+#ifdef ARDUINO_ARCH_RP2040
+  can2515.setPins(1, 2, 3, 4, 5);           // select pins for CAN bus CE and interrupt connections
+#else
   can2515.setPins(10, 2);           // select pins for CAN bus CE and interrupt connections
+#endif
+
   if (!can2515.begin())
   {
     Serial << F("> error starting VLCB") << endl;
@@ -205,7 +210,7 @@ void loop()
 }
 
 //
-// Callback used when teaching produced events. 
+// Callback used when teaching produced events.
 // Returns the index of the switch that was pressed which is the taught event shall relate to.
 //
 byte checkInputProduced()
@@ -235,7 +240,7 @@ void processModuleSwitchChange()
   if (moduleSwitch.stateChanged())
   {
     bool state = moduleSwitch.isPressed();
-    byte eventIndex = 0;  
+    byte eventIndex = 0;
     epService.sendEvent(state, eventIndex);
   }
 }

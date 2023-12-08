@@ -2,9 +2,12 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR avr)
 
+find_path(
+ARDUINO_PATH
+NAMES "hardware"
+PATHS "$ENV{HOME}/.arduino15/packages/arduino" "/usr/share/arduino")
+
 # User settings with sensible defaults
-set(ARDUINO_PATH "$ENV{HOME}/.arduino15/packages/arduino" CACHE PATH
-    "Path of the Arduino packages folder, e.g. ~/.arduino15/packages/arduino.")
 set(ARDUINO_USER_PATH "$ENV{HOME}/Arduino" CACHE PATH
     "Path of the Arduino user folder")
 set(ARDUINO_CORE_VERSION "1.8.6" CACHE STRING

@@ -165,7 +165,12 @@ void setupVLCB()
   // configure and start CAN bus and VLCB message processing
   can2515.setNumBuffers(6, 1);      // more buffers = more memory used, fewer = less
   can2515.setOscFreq(16000000UL);   // select the crystal frequency of the CAN module
+#ifdef ARDUINO_ARCH_RP2040
+  can2515.setPins(1, 2, 3, 4, 5);           // select pins for CAN bus CE and interrupt connections
+#else
   can2515.setPins(10, 2);           // select pins for CAN bus CE and interrupt connections
+#endif
+
   if (!can2515.begin())
   {
     Serial << F("> error starting VLCB") << endl;
